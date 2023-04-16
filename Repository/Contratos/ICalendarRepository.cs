@@ -12,6 +12,7 @@ namespace apiCalendar.Repository.Contratos
         #region "Metodos o procedimientos"
 
         IEnumerable<EventTypeBE> GetEventTypes();
+        Task<IEnumerable<EventTypeBE>> GetEventTypesAsync();
         RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE);
 
         #endregion

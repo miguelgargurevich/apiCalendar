@@ -52,6 +52,25 @@ namespace apiCalendar.Services.Implementaciones
 
         }
 
+        public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
+        {
+            IEnumerable<EventTypeBE> list = new List<EventTypeBE>();
+            try
+            {
+                list = await _apiCalendarRepository.GetEventTypesAsync();
+            }
+            catch (Exception ex)
+            {
+                //list.code = "-1";
+                //list.message = "Error: " + ex.Message.ToString();
+
+                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+            }
+
+            return list;
+
+        }
+
 
         public RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE)
         {

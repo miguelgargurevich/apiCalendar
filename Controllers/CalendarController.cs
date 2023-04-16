@@ -55,7 +55,15 @@ namespace CoreApi.Controllers
             return respuestaBE.ToArray();
         }
 
-       
+        [Route("getEventTypesAsync")]
+        [HttpGet]
+        public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
+        {
+
+            var respuestaBE = await _CalendarServices.GetEventTypesAsync();
+            return respuestaBE.ToArray();
+        }
+
         [Route("procesar")]
         [HttpPost]
         public IActionResult procesarLineaCredito([FromBody] CreditLineBE creditLineBE)

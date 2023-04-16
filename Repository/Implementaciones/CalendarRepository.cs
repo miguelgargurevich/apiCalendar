@@ -62,6 +62,33 @@ namespace apiCalendar.Repository.Implementaciones
                 }
             }
 
+            return list;
+        }
+
+        public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
+        {
+            List<EventTypeBE> list = new List<EventTypeBE>();
+            var connectionString = UI.connectionString;
+            var queryString = "select * from [dbo].[EventType]";
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                using (var adapter = new SqlDataAdapter(queryString, connection))
+                {
+                    await connection.OpenAsync();
+                    var reader = await adapter.SelectCommand.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        EventTypeBE myevent = new EventTypeBE();
+                        myevent.id = reader.GetInt32(0);
+                        myevent.name = reader.GetString(1);
+                        myevent.color = reader.GetString(2);
+                        list.Add(myevent);
+                    }
+
+                }
+            }
+
             return list.ToArray();
         }
         #endregion

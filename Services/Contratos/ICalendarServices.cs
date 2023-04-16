@@ -13,6 +13,8 @@ namespace apiCalendar.Services.Contratos
         RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE);
 
         IEnumerable<EventTypeBE> GetEventTypes();
+
+        Task<IEnumerable<EventTypeBE>> GetEventTypesAsync();
         #endregion
 
     }
