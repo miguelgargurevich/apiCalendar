@@ -2,11 +2,10 @@ using apiCalendar.Repository.Contratos;
 using apiCalendar.Repository.Implementaciones;
 using apiCalendar.Services.Contratos;
 using apiCalendar.Services.Implementaciones;
-using apiCalendar.Entidades;
+using apiCalendar.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-UI.connectionString = builder.Configuration.GetConnectionString("default");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -29,6 +28,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(x => x.AllowAnyHeader()
+      .AllowAnyMethod()
+      .WithOrigins("*"));
 
 app.UseAuthorization();
 

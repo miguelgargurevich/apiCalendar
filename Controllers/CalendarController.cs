@@ -21,7 +21,7 @@ using apiCalendar;
 namespace CoreApi.Controllers
 {
     [ApiController]
-    [Route("calendar")]
+    [Route("api/calendar")]
     public class CalendarController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -48,20 +48,20 @@ namespace CoreApi.Controllers
 
         [Route("getEventTypes")]
         [HttpGet]
-        public IEnumerable<EventTypeBE> getEventTypes()
+        public IActionResult getEventTypes()
         {
 
             var respuestaBE = _CalendarServices.GetEventTypes();
-            return respuestaBE.ToArray();
+            return Ok(respuestaBE.ToArray());
         }
 
         [Route("getEventTypesAsync")]
         [HttpGet]
-        public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
+        public async Task<IActionResult> GetEventTypesAsync()
         {
 
             var respuestaBE = await _CalendarServices.GetEventTypesAsync();
-            return respuestaBE.ToArray();
+            return Ok(respuestaBE.ToArray());
         }
 
         [Route("procesar")]

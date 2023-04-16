@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
+using apiCalendar.Models;
 
 namespace apiCalendar.Repository.Implementaciones
 {
@@ -39,24 +40,24 @@ namespace apiCalendar.Repository.Implementaciones
         #region "Metodos y Funciones"
 
         public IEnumerable<EventTypeBE> GetEventTypes() 
-        { 
+        {
+            var connectionString = _configuration.GetConnectionString("Default");
             List<EventTypeBE> list = new List<EventTypeBE>();
-            var connectionString = UI.connectionString;
             var queryString = "select * from [dbo].[EventType]";
 
-            using (var connection = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
-                using (var adapter = new SqlDataAdapter(queryString, connection))
+                using (var adapter = new SqlDataAdapter(queryString, conn))
                 {
-                    connection.Open();
+                    conn.Open();
                     var reader = adapter.SelectCommand.ExecuteReader();
                     while (reader.Read())
                     {
-                        EventTypeBE myevent = new EventTypeBE();
-                        myevent.id = reader.GetInt32(0);
-                        myevent.name = reader.GetString(1);
-                        myevent.color = reader.GetString(2);
-                        list.Add(myevent);
+                        EventTypeBE obj = new EventTypeBE();
+                        obj.id = reader.GetInt32(0);
+                        obj.name = reader.GetString(1);
+                        obj.color = reader.GetString(2);
+                        list.Add(obj);
                     }
                     
                 }
@@ -67,8 +68,8 @@ namespace apiCalendar.Repository.Implementaciones
 
         public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
         {
+            var connectionString = _configuration.GetConnectionString("Default");
             List<EventTypeBE> list = new List<EventTypeBE>();
-            var connectionString = UI.connectionString;
             var queryString = "select * from [dbo].[EventType]";
 
             using (var connection = new SqlConnection(connectionString))
@@ -336,9 +337,6 @@ namespace apiCalendar.Repository.Implementaciones
 
     }
 
-    public static class UI
-    {
-        public static string? connectionString { get; set; }
-    }
+
 
 }
