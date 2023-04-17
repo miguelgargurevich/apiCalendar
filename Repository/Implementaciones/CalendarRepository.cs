@@ -141,7 +141,7 @@ namespace apiCalendar.Repository.Implementaciones
             CalendarBE list = new CalendarBE();
             var _connStr = _configuration.GetConnectionString("Default");
             string _query = "" +
-                "UPDATE Calendar SET title = @title, startdate = @startdate, enddate = @enddate, description = @description, eventtypeid = @eventtypeid, eventtypename = @eventtypename, calendartypeid = @calendartypeid,calendartypename = @calendartypename, allday = @allday, WHERE id = @id";
+                "UPDATE Calendar SET title = @title, startdate = @startdate, enddate = @enddate, description = @description, eventtypeid = @eventtypeid, eventtypename = @eventtypename, calendartypeid = @calendartypeid,calendartypename = @calendartypename, allday = @allday WHERE id = @id";
             using (SqlConnection conn = new SqlConnection(_connStr))
             {
                 using (SqlCommand comm = new SqlCommand())
