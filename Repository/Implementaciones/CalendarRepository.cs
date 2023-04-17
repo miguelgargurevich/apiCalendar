@@ -16,6 +16,7 @@ using Microsoft.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
 using apiCalendar.Models;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace apiCalendar.Repository.Implementaciones
 {
@@ -106,16 +107,16 @@ namespace apiCalendar.Repository.Implementaciones
                     comm.Connection = conn;
                     comm.CommandType = CommandType.Text;
                     comm.CommandText = _query;
-                    comm.Parameters.AddWithValue("@id", calendarBE.Id);
-                    comm.Parameters.AddWithValue("@title", calendarBE.Title);
-                    comm.Parameters.AddWithValue("@startdate", calendarBE.StartDate);
-                    comm.Parameters.AddWithValue("@enddate", calendarBE.EndDate);
-                    comm.Parameters.AddWithValue("@allDay", calendarBE.AllDay);
+                    comm.Parameters.AddWithValue("@id", calendarBE.id);
+                    comm.Parameters.AddWithValue("@title", calendarBE.title);
+                    comm.Parameters.AddWithValue("@startdate", calendarBE.start);
+                    comm.Parameters.AddWithValue("@enddate", calendarBE.end);
+                    comm.Parameters.AddWithValue("@allDay", calendarBE.allDay);
                     comm.Parameters.AddWithValue("@eventTypeId", calendarBE.EventTypeId);
-                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.EventTypeName);
+                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.type);
                     comm.Parameters.AddWithValue("@calendarTypeId", calendarBE.CalendarTypeId);
                     comm.Parameters.AddWithValue("@calendarTypeName", calendarBE.CalendarTypeName);
-                    comm.Parameters.AddWithValue("@description", calendarBE.Description);
+                    comm.Parameters.AddWithValue("@description", calendarBE.description);
                     comm.Parameters.AddWithValue("@userCreate", calendarBE.UserCreate);
                     comm.Parameters.AddWithValue("@dateCreate", DateTime.Now);
                     try
@@ -149,16 +150,16 @@ namespace apiCalendar.Repository.Implementaciones
                     comm.Connection = conn;
                     comm.CommandType = CommandType.Text;
                     comm.CommandText = _query;
-                    comm.Parameters.AddWithValue("@id", calendarBE.Id);
-                    comm.Parameters.AddWithValue("@title", calendarBE.Title);
-                    comm.Parameters.AddWithValue("@startdate", calendarBE.StartDate);
-                    comm.Parameters.AddWithValue("@enddate", calendarBE.EndDate);
-                    comm.Parameters.AddWithValue("@allDay", calendarBE.AllDay);
+                    comm.Parameters.AddWithValue("@id", calendarBE.id);
+                    comm.Parameters.AddWithValue("@title", calendarBE.title);
+                    comm.Parameters.AddWithValue("@startdate", calendarBE.start);
+                    comm.Parameters.AddWithValue("@enddate", calendarBE.end);
+                    comm.Parameters.AddWithValue("@allDay", calendarBE.allDay);
                     comm.Parameters.AddWithValue("@eventTypeId", calendarBE.EventTypeId);
-                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.EventTypeName);
+                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.type);
                     comm.Parameters.AddWithValue("@calendarTypeId", calendarBE.CalendarTypeId);
                     comm.Parameters.AddWithValue("@calendarTypeName", calendarBE.CalendarTypeName);
-                    comm.Parameters.AddWithValue("@description", calendarBE.Description);
+                    comm.Parameters.AddWithValue("@description", calendarBE.description);
                     try
                     {
                         conn.Open();
@@ -177,6 +178,83 @@ namespace apiCalendar.Repository.Implementaciones
 
         }
 
+        public async Task<CalendarBE> PostEventDelAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            var _connStr = _configuration.GetConnectionString("Default");
+            string _query = "" +
+                "Delete from Calendar WHERE id = @id";
+            using (SqlConnection conn = new SqlConnection(_connStr))
+            {
+                using (SqlCommand comm = new SqlCommand())
+                {
+                    comm.Connection = conn;
+                    comm.CommandType = CommandType.Text;
+                    comm.CommandText = _query;
+                    comm.Parameters.AddWithValue("@id", calendarBE.id);
+                   
+                    try
+                    {
+                        conn.Open();
+                        comm.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        // other codes here
+                        // do something with the exception
+                        // don't swallow it.
+                    }
+                }
+            }
+
+            return list;
+
+        }
+
+        public async Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id)
+        {
+            List<CalendarBE> list = new List<CalendarBE>();
+            var connectionString = _configuration.GetConnectionString("Default");
+
+            var idquery = "a.id";
+            if (id != 0)
+                idquery = id.ToString();
+
+            string queryString = "SELECT a.id, a.title, a.startdate, a.enddate, a.description, a.eventtypeid, a.eventtypename, a.calendartypeid, " +
+                "a.calendartypename, a.userCreate, a.dateCreate, a.allday, b.color " +
+                "FROM  dbo.Calendar a inner join dbo.EventType b on b.name = a.eventtypename where a.id = " + idquery;
+
+            using (var conn = new SqlConnection(connectionString))
+            {
+                using (var adapter = new SqlDataAdapter(queryString, conn))
+                {
+                    conn.Open();
+                    var reader = adapter.SelectCommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        CalendarBE obj = new CalendarBE();
+                        obj.id = reader.GetInt32(0);
+                        obj.title = reader.GetString(1);
+                        obj.start = reader.GetDateTime(2);
+                        obj.end = reader.GetDateTime(3);
+                        obj.description = reader.GetString(4);
+                        obj.EventTypeId = reader.GetInt32(5);
+                        obj.type = reader.GetString(6);
+                        obj.CalendarTypeId = reader.GetInt32(7);
+                        obj.CalendarTypeName = reader.GetString(8);
+                        obj.UserCreate = reader.GetInt32(9);
+                        obj.DateCreate = reader.GetDateTime(10);
+                        obj.allDay = Convert.ToBoolean(reader.GetInt32(11));
+                        obj.color = reader.GetString(12);
+                        list.Add(obj);
+                    }
+
+                }
+            }
+
+            return list;
+
+        }
         #endregion
 
         #region "Metodos y Funciones Linea de credito"

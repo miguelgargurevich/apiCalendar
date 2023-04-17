@@ -15,6 +15,8 @@ namespace apiCalendar.Repository.Contratos
         Task<IEnumerable<EventTypeBE>> GetEventTypesAsync();
         Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE);
         Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE);
+        Task<CalendarBE> PostEventDelAsync(CalendarBE calendarBE);
+        Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id); 
 
         RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE);
 

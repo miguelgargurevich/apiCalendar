@@ -76,10 +76,29 @@ namespace CoreApi.Controllers
 
         [Route("postEventUpdAsync")]
         [HttpPost]
-        public async Task<IActionResult> postEventUpdAsync([FromBody] CalendarBE calendarBE)
+        public async Task<IActionResult> PostEventUpdAsync([FromBody] CalendarBE calendarBE)
         {
 
             var respuestaBE = await _CalendarServices.PostEventUpdAsync(calendarBE);
+            return Ok(respuestaBE);
+        }
+
+        [Route("postEventDelAsync")]
+        [HttpPost]
+        public async Task<IActionResult> PostEventDelAsync([FromBody] CalendarBE calendarBE)
+        {
+
+            var respuestaBE = await _CalendarServices.PostEventDelAsync(calendarBE);
+            return Ok(respuestaBE);
+        }
+
+        
+        [Route("getCalendarAsync")]
+        [HttpGet]
+        public async Task<IActionResult> GetCalendarAsync(int id)
+        {
+
+            var respuestaBE = await _CalendarServices.GetCalendarAsync(id);
             return Ok(respuestaBE);
         }
 

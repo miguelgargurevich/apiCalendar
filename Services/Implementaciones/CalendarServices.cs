@@ -64,7 +64,7 @@ namespace apiCalendar.Services.Implementaciones
                 //list.code = "-1";
                 //list.message = "Error: " + ex.Message.ToString();
 
-                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+                CapturarError(ex, "apiCalendarService", "GetEventTypesAsync");
             }
 
             return list;
@@ -83,7 +83,7 @@ namespace apiCalendar.Services.Implementaciones
                 //list.code = "-1";
                 //list.message = "Error: " + ex.Message.ToString();
 
-                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+                CapturarError(ex, "apiCalendarService", "PostEventAddAsync");
             }
 
             return list;
@@ -102,13 +102,50 @@ namespace apiCalendar.Services.Implementaciones
                 //list.code = "-1";
                 //list.message = "Error: " + ex.Message.ToString();
 
-                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+                CapturarError(ex, "apiCalendarService", "PostEventUpdAsync");
             }
 
             return list;
 
         }
 
+        public async Task<CalendarBE> PostEventDelAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            try
+            {
+                list = await _apiCalendarRepository.PostEventDelAsync(calendarBE);
+            }
+            catch (Exception ex)
+            {
+                //list.code = "-1";
+                //list.message = "Error: " + ex.Message.ToString();
+
+                CapturarError(ex, "apiCalendarService", "PostEventDelAsync");
+            }
+
+            return list;
+
+        }
+        
+        public async Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id)
+        {
+            IEnumerable<CalendarBE> list = new List<CalendarBE>();
+            try
+            {
+                list = await _apiCalendarRepository.GetCalendarAsync(id);
+            }
+            catch (Exception ex)
+            {
+                //list.code = "-1";
+                //list.message = "Error: " + ex.Message.ToString();
+
+                CapturarError(ex, "apiCalendarService", "GetCalendarAsync");
+            }
+
+            return list;
+
+        }
 
         public RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE)
         {
