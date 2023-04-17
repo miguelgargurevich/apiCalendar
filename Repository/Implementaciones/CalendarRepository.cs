@@ -54,9 +54,9 @@ namespace apiCalendar.Repository.Implementaciones
                     while (reader.Read())
                     {
                         EventTypeBE obj = new EventTypeBE();
-                        obj.id = reader.GetInt32(0);
-                        obj.name = reader.GetString(1);
-                        obj.color = reader.GetString(2);
+                        obj.Id = reader.GetInt32(0);
+                        obj.Name = reader.GetString(1);
+                        obj.Color = reader.GetString(2);
                         list.Add(obj);
                     }
                     
@@ -81,9 +81,9 @@ namespace apiCalendar.Repository.Implementaciones
                     while (await reader.ReadAsync())
                     {
                         EventTypeBE myevent = new EventTypeBE();
-                        myevent.id = reader.GetInt32(0);
-                        myevent.name = reader.GetString(1);
-                        myevent.color = reader.GetString(2);
+                        myevent.Id = reader.GetInt32(0);
+                        myevent.Name = reader.GetString(1);
+                        myevent.Color = reader.GetString(2);
                         list.Add(myevent);
                     }
 
@@ -92,6 +92,91 @@ namespace apiCalendar.Repository.Implementaciones
 
             return list.ToArray();
         }
+
+        public async Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            var _connStr = _configuration.GetConnectionString("Default");
+            string _query = "INSERT INTO [Calendar] (Id,Title,StartDate,EndDate,AllDay,EventTypeId,EventTypeName,CalendarTypeId,CalendarTypeName,Description,UserCreate,DateCreate) " +
+                "values (@id,@title,@startdate,@enddate,@allDay,@eventTypeId,@eventTypeName,@calendarTypeId,@calendarTypeName,@description,@userCreate,@dateCreate)";
+            using (SqlConnection conn = new SqlConnection(_connStr))
+            {
+                using (SqlCommand comm = new SqlCommand())
+                {
+                    comm.Connection = conn;
+                    comm.CommandType = CommandType.Text;
+                    comm.CommandText = _query;
+                    comm.Parameters.AddWithValue("@id", calendarBE.Id);
+                    comm.Parameters.AddWithValue("@title", calendarBE.Title);
+                    comm.Parameters.AddWithValue("@startdate", calendarBE.StartDate);
+                    comm.Parameters.AddWithValue("@enddate", calendarBE.EndDate);
+                    comm.Parameters.AddWithValue("@allDay", calendarBE.AllDay);
+                    comm.Parameters.AddWithValue("@eventTypeId", calendarBE.EventTypeId);
+                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.EventTypeName);
+                    comm.Parameters.AddWithValue("@calendarTypeId", calendarBE.CalendarTypeId);
+                    comm.Parameters.AddWithValue("@calendarTypeName", calendarBE.CalendarTypeName);
+                    comm.Parameters.AddWithValue("@description", calendarBE.Description);
+                    comm.Parameters.AddWithValue("@userCreate", calendarBE.UserCreate);
+                    comm.Parameters.AddWithValue("@dateCreate", DateTime.Now);
+                    try
+                    {
+                        conn.Open();
+                        comm.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        // other codes here
+                        // do something with the exception
+                        // don't swallow it.
+                    }
+                }
+            }
+
+            return list;
+
+        }
+
+        public async Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            var _connStr = _configuration.GetConnectionString("Default");
+            string _query = "" +
+                "UPDATE Calendar SET title = @title, startdate = @startdate, enddate = @enddate, description = @description, eventtypeid = @eventtypeid, eventtypename = @eventtypename, calendartypeid = @calendartypeid,calendartypename = @calendartypename, allday = @allday, WHERE id = @id";
+            using (SqlConnection conn = new SqlConnection(_connStr))
+            {
+                using (SqlCommand comm = new SqlCommand())
+                {
+                    comm.Connection = conn;
+                    comm.CommandType = CommandType.Text;
+                    comm.CommandText = _query;
+                    comm.Parameters.AddWithValue("@id", calendarBE.Id);
+                    comm.Parameters.AddWithValue("@title", calendarBE.Title);
+                    comm.Parameters.AddWithValue("@startdate", calendarBE.StartDate);
+                    comm.Parameters.AddWithValue("@enddate", calendarBE.EndDate);
+                    comm.Parameters.AddWithValue("@allDay", calendarBE.AllDay);
+                    comm.Parameters.AddWithValue("@eventTypeId", calendarBE.EventTypeId);
+                    comm.Parameters.AddWithValue("@eventTypeName", calendarBE.EventTypeName);
+                    comm.Parameters.AddWithValue("@calendarTypeId", calendarBE.CalendarTypeId);
+                    comm.Parameters.AddWithValue("@calendarTypeName", calendarBE.CalendarTypeName);
+                    comm.Parameters.AddWithValue("@description", calendarBE.Description);
+                    try
+                    {
+                        conn.Open();
+                        comm.ExecuteNonQuery();
+                    }
+                    catch (SqlException ex)
+                    {
+                        // other codes here
+                        // do something with the exception
+                        // don't swallow it.
+                    }
+                }
+            }
+
+            return list;
+
+        }
+
         #endregion
 
         #region "Metodos y Funciones Linea de credito"

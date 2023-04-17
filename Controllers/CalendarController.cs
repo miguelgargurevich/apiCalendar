@@ -64,6 +64,25 @@ namespace CoreApi.Controllers
             return Ok(respuestaBE.ToArray());
         }
 
+        
+        [Route("postEventAddAsync")]
+        [HttpPost]
+        public async Task<IActionResult> PostEventAddAsync([FromBody] CalendarBE calendarBE)
+        {
+
+            var respuestaBE = await _CalendarServices.PostEventAddAsync(calendarBE);
+            return Ok(respuestaBE);
+        }
+
+        [Route("postEventUpdAsync")]
+        [HttpPost]
+        public async Task<IActionResult> postEventUpdAsync([FromBody] CalendarBE calendarBE)
+        {
+
+            var respuestaBE = await _CalendarServices.PostEventUpdAsync(calendarBE);
+            return Ok(respuestaBE);
+        }
+
         [Route("procesar")]
         [HttpPost]
         public IActionResult procesarLineaCredito([FromBody] CreditLineBE creditLineBE)

@@ -71,6 +71,44 @@ namespace apiCalendar.Services.Implementaciones
 
         }
 
+        public async Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            try
+            {
+                list = await _apiCalendarRepository.PostEventAddAsync(calendarBE);
+            }
+            catch (Exception ex)
+            {
+                //list.code = "-1";
+                //list.message = "Error: " + ex.Message.ToString();
+
+                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+            }
+
+            return list;
+
+        }
+
+        public async Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE)
+        {
+            CalendarBE list = new CalendarBE();
+            try
+            {
+                list = await _apiCalendarRepository.PostEventUpdAsync(calendarBE);
+            }
+            catch (Exception ex)
+            {
+                //list.code = "-1";
+                //list.message = "Error: " + ex.Message.ToString();
+
+                CapturarError(ex, "apiCalendarService", "GetEventTypes");
+            }
+
+            return list;
+
+        }
+
 
         public RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE)
         {

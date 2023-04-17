@@ -15,6 +15,9 @@ namespace apiCalendar.Services.Contratos
         IEnumerable<EventTypeBE> GetEventTypes();
 
         Task<IEnumerable<EventTypeBE>> GetEventTypesAsync();
+
+        Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE);
+        Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE);
         #endregion
 
     }
