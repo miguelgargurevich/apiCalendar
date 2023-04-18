@@ -98,8 +98,10 @@ namespace apiCalendar.Repository.Implementaciones
         {
             CalendarBE list = new CalendarBE();
             var _connStr = _configuration.GetConnectionString("Default");
-            string _query = "INSERT INTO [Calendar] (Id,Title,StartDate,EndDate,AllDay,EventTypeId,EventTypeName,CalendarTypeId,CalendarTypeName,Description,UserCreate,DateCreate) " +
-                "values (@id,@title,@startdate,@enddate,@allDay,@eventTypeId,@eventTypeName,@calendarTypeId,@calendarTypeName,@description,@userCreate,@dateCreate)";
+            string _query = "INSERT INTO [Calendar] (Title,StartDate,EndDate,AllDay,EventTypeId,EventTypeName,CalendarTypeId,CalendarTypeName,Description,UserCreate,DateCreate) " +
+                "values (@title,@startdate,@enddate,@allDay,@eventTypeId,@eventTypeName,@calendarTypeId,@calendarTypeName,@description,@userCreate,@dateCreate)" +
+                " Set @id = Scope_Identity();";
+            
             using (SqlConnection conn = new SqlConnection(_connStr))
             {
                 using (SqlCommand comm = new SqlCommand())
@@ -107,7 +109,7 @@ namespace apiCalendar.Repository.Implementaciones
                     comm.Connection = conn;
                     comm.CommandType = CommandType.Text;
                     comm.CommandText = _query;
-                    comm.Parameters.AddWithValue("@id", calendarBE.id);
+                    //comm.Parameters.AddWithValue("@id", calendarBE.id);
                     comm.Parameters.AddWithValue("@title", calendarBE.title);
                     comm.Parameters.AddWithValue("@startdate", calendarBE.start);
                     comm.Parameters.AddWithValue("@enddate", calendarBE.end);
@@ -119,13 +121,18 @@ namespace apiCalendar.Repository.Implementaciones
                     comm.Parameters.AddWithValue("@description", calendarBE.description);
                     comm.Parameters.AddWithValue("@userCreate", calendarBE.UserCreate);
                     comm.Parameters.AddWithValue("@dateCreate", DateTime.Now);
+                    comm.Parameters.Add("@id", SqlDbType.Int).Direction = ParameterDirection.Output;
                     try
                     {
                         conn.Open();
                         comm.ExecuteNonQuery();
+
+                        int returnID = (int)comm.Parameters["@id"].Value;
+                        list.id = returnID;
                     }
                     catch (SqlException ex)
                     {
+                        CapturarError(ex, "Repository", "PostEventAddAsync");
                         // other codes here
                         // do something with the exception
                         // don't swallow it.
@@ -167,6 +174,7 @@ namespace apiCalendar.Repository.Implementaciones
                     }
                     catch (SqlException ex)
                     {
+                        CapturarError(ex, "Repository", "PostEventUpdAsync");
                         // other codes here
                         // do something with the exception
                         // don't swallow it.
@@ -200,6 +208,7 @@ namespace apiCalendar.Repository.Implementaciones
                     }
                     catch (SqlException ex)
                     {
+                        CapturarError(ex, "Repository", "PostEventDelAsync");
                         // other codes here
                         // do something with the exception
                         // don't swallow it.
@@ -224,33 +233,40 @@ namespace apiCalendar.Repository.Implementaciones
                 "a.calendartypename, a.userCreate, a.dateCreate, a.allday, b.color " +
                 "FROM  dbo.Calendar a inner join dbo.EventType b on b.name = a.eventtypename where a.id = " + idquery;
 
-            using (var conn = new SqlConnection(connectionString))
-            {
-                using (var adapter = new SqlDataAdapter(queryString, conn))
+            try {
+                using (var conn = new SqlConnection(connectionString))
                 {
-                    conn.Open();
-                    var reader = adapter.SelectCommand.ExecuteReader();
-                    while (reader.Read())
+                    using (var adapter = new SqlDataAdapter(queryString, conn))
                     {
-                        CalendarBE obj = new CalendarBE();
-                        obj.id = reader.GetInt32(0);
-                        obj.title = reader.GetString(1);
-                        obj.start = reader.GetDateTime(2);
-                        obj.end = reader.GetDateTime(3);
-                        obj.description = reader.GetString(4);
-                        obj.EventTypeId = reader.GetInt32(5);
-                        obj.type = reader.GetString(6);
-                        obj.CalendarTypeId = reader.GetInt32(7);
-                        obj.CalendarTypeName = reader.GetString(8);
-                        obj.UserCreate = reader.GetInt32(9);
-                        obj.DateCreate = reader.GetDateTime(10);
-                        obj.allDay = Convert.ToBoolean(reader.GetInt32(11));
-                        obj.color = reader.GetString(12);
-                        list.Add(obj);
-                    }
+                        conn.Open();
+                        var reader = adapter.SelectCommand.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            CalendarBE obj = new CalendarBE();
+                            obj.id = reader.GetInt32(0);
+                            obj.title = reader.GetString(1);
+                            obj.start = reader.GetDateTime(2);
+                            obj.end = reader.GetDateTime(3);
+                            obj.description = reader.GetString(4);
+                            obj.EventTypeId = reader.GetInt32(5);
+                            obj.type = reader.GetString(6);
+                            obj.CalendarTypeId = reader.GetInt32(7);
+                            obj.CalendarTypeName = reader.GetString(8);
+                            obj.UserCreate = reader.GetInt32(9);
+                            obj.DateCreate = reader.GetDateTime(10);
+                            obj.allDay = Convert.ToBoolean(reader.GetInt32(11));
+                            obj.color = reader.GetString(12);
+                            list.Add(obj);
+                        }
 
+                    }
                 }
             }
+            catch (SqlException ex) 
+            { 
+                CapturarError(ex, "Repository", "GetCalendarAsync");
+            }
+           
 
             return list;
 
