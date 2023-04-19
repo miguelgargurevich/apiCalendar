@@ -11,10 +11,8 @@ namespace apiCalendar.Services.Contratos
     {
 
         #region "Metodos o procedimientos"
-        RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE);
 
         IEnumerable<EventTypeBE> GetEventTypes();
-
         Task<IEnumerable<EventTypeBE>> GetEventTypesAsync();
         Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE);
         Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE);

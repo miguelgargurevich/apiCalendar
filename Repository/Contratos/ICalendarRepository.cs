@@ -18,8 +18,6 @@ namespace apiCalendar.Repository.Contratos
         Task<CalendarBE> PostEventDelAsync(CalendarBE calendarBE);
         Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id); 
 
-        RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE);
-
         #endregion
 
     }

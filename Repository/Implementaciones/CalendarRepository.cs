@@ -42,7 +42,7 @@ namespace apiCalendar.Repository.Implementaciones
 
         public IEnumerable<EventTypeBE> GetEventTypes() 
         {
-            var connectionString = _configuration.GetConnectionString("Default");
+            var connectionString = _configuration.GetConnectionString("Produccion");
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
@@ -69,7 +69,7 @@ namespace apiCalendar.Repository.Implementaciones
 
         public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
         {
-            var connectionString = _configuration.GetConnectionString("Default");
+            var connectionString = _configuration.GetConnectionString("Produccion");
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
@@ -97,7 +97,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<CalendarBE> PostEventAddAsync(CalendarBE calendarBE)
         {
             CalendarBE list = new CalendarBE();
-            var _connStr = _configuration.GetConnectionString("Default");
+            var _connStr = _configuration.GetConnectionString("Produccion");
             string _query = "INSERT INTO [Calendar] (Title,StartDate,EndDate,AllDay,EventTypeId,EventTypeName,CalendarTypeId,CalendarTypeName,Description,UserCreate,DateCreate) " +
                 "values (@title,@startdate,@enddate,@allDay,@eventTypeId,@eventTypeName,@calendarTypeId,@calendarTypeName,@description,@userCreate,@dateCreate)" +
                 " Set @id = Scope_Identity();";
@@ -147,7 +147,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<CalendarBE> PostEventUpdAsync(CalendarBE calendarBE)
         {
             CalendarBE list = new CalendarBE();
-            var _connStr = _configuration.GetConnectionString("Default");
+            var _connStr = _configuration.GetConnectionString("Produccion");
             string _query = "" +
                 "UPDATE Calendar SET title = @title, startdate = @startdate, enddate = @enddate, description = @description, eventtypeid = @eventtypeid, eventtypename = @eventtypename, calendartypeid = @calendartypeid,calendartypename = @calendartypename, allday = @allday WHERE id = @id";
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -189,7 +189,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<CalendarBE> PostEventDelAsync(CalendarBE calendarBE)
         {
             CalendarBE list = new CalendarBE();
-            var _connStr = _configuration.GetConnectionString("Default");
+            var _connStr = _configuration.GetConnectionString("Produccion");
             string _query = "" +
                 "Delete from Calendar WHERE id = @id";
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -223,7 +223,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id)
         {
             List<CalendarBE> list = new List<CalendarBE>();
-            var connectionString = _configuration.GetConnectionString("Default");
+            var connectionString = _configuration.GetConnectionString("Produccion");
 
             var idquery = "a.id";
             if (id != 0)
@@ -274,221 +274,6 @@ namespace apiCalendar.Repository.Implementaciones
         #endregion
 
         #region "Metodos y Funciones Linea de credito"
-        public RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE)
-        {
-            RespuestaBE respuestaBE = new RespuestaBE();
-
-
-            try
-            {
-                //obtiene lastRequest
-                bool lastRequestAccepted = true;
-                int lastRequestNumbers = 1;
-                TimeSpan lastRequestDate = DateTime.Now.TimeOfDay; ;
-                TimeSpan nowRequestDate = Convert.ToDateTime(creditLineBE.requestedDate).TimeOfDay;
-
-                var lastTrama = LeerTramas();
-                if (lastTrama.requestNumbers != null)
-                {
-                    lastRequestNumbers = (int)lastTrama.requestNumbers + 1;
-                    lastRequestDate = Convert.ToDateTime(lastTrama.requestedDate).TimeOfDay;
-                    lastRequestAccepted = Convert.ToBoolean(lastTrama.requestAccepted);
-                }
-
-                if (ValidPreviousRequest(lastRequestAccepted, nowRequestDate, lastRequestDate, respuestaBE) == false)
-                    return respuestaBE;
-
-                //calcula Recommended apiCalendar
-                double recommendedapiCalendar = GetRecommendedapiCalendar(creditLineBE);
-
-                //valida accepted o rejected
-                bool accepted = recommendedapiCalendar > creditLineBE.requestedapiCalendar;
-                if (accepted)
-                {
-                    var timeRequest = nowRequestDate - lastRequestDate;
-
-                    if (ValidAcceptedRequest(lastRequestNumbers, timeRequest, respuestaBE) == false)
-                        return respuestaBE;
-                    else if (lastRequestNumbers >= maxNumbersRequest && timeRequest.TotalMinutes > maxTotalMinutesRequest)
-                        lastRequestNumbers = ResetRequestNumbers();
-
-                    var crediLine = Math.Round(recommendedapiCalendar, 2);
-                    string msg = "Credit line authorized: " + crediLine.ToString();
-                    respuestaBE.code = "1";
-                    respuestaBE.status = StatusCodes.Status200OK;
-                    respuestaBE.retornoBool = true;
-                    respuestaBE.message = "Acepted";
-                    respuestaBE.messageDetail = msg;
-
-                    creditLineBE.recommendedapiCalendar = crediLine;
-                    creditLineBE.requestAccepted = accepted.ToString();
-                    creditLineBE.requestNumbers = lastRequestNumbers;
-                    creditLineBE.requestMessage = msg;
-                    //guardar Request
-                    GuardarTrama(creditLineBE);
-                }
-                else
-                {
-                    if (lastRequestAccepted == true)
-                        lastRequestNumbers = ResetRequestNumbers();
-
-                    ValidRejectedRequest(lastRequestAccepted, lastRequestNumbers, respuestaBE);
-
-                    var crediLine = Math.Round(recommendedapiCalendar, 2);
-                    string msg = respuestaBE.messageDetail;
-                    creditLineBE.recommendedapiCalendar = crediLine;
-                    creditLineBE.requestAccepted = accepted.ToString();
-                    creditLineBE.requestNumbers = lastRequestNumbers;
-                    creditLineBE.requestMessage = msg;
-
-                    //guardar Request
-                    GuardarTrama(creditLineBE);
-                }
-
-                return respuestaBE;
-
-            }
-            catch (Exception ex)
-            {
-                CapturarError(ex, "Repository", "ProcesarLineaCredito");
-
-                respuestaBE.code = "-1";
-                respuestaBE.status = StatusCodes.Status500InternalServerError;
-                respuestaBE.retornoBool = false;
-                respuestaBE.message = "Error";
-                respuestaBE.messageDetail = ex.Message;
-
-                return respuestaBE;
-            }
-        }
-
-        private int ResetRequestNumbers()
-        {
-            return 1;
-        }
-
-        private void ValidRejectedRequest(bool lastRequestAccepted, int lastRequestNumbers, RespuestaBE respuestaBE)
-        {
-            //After failing 3 times, return the message "A sales agent will contact you".
-            if (lastRequestAccepted == false && lastRequestNumbers > 3)
-            {
-                respuestaBE.code = "-101";
-                respuestaBE.status = StatusCodes.Status200OK;
-                respuestaBE.retornoBool = false;
-                respuestaBE.message = "Rejected";
-                respuestaBE.messageDetail = "A sales agent will contact you";
-            }
-            else
-            {
-                respuestaBE.code = "-100";
-                respuestaBE.status = StatusCodes.Status200OK;
-                respuestaBE.retornoBool = false;
-                respuestaBE.message = "Rejected";
-                respuestaBE.messageDetail = "The recommended credit line is lower than requested";
-            }
-
-        }
-
-        private bool ValidAcceptedRequest(int lastRequestNumbers, TimeSpan timeRequest, RespuestaBE respuestaBE)
-        {
-            //If the system receives 3 or more requests within two minutes, return the http code 429.
-            if (lastRequestNumbers >= maxNumbersRequest && timeRequest.TotalMinutes <= maxTotalMinutesRequest)
-            {
-                respuestaBE.code = "-102";
-                respuestaBE.status = StatusCodes.Status429TooManyRequests;
-                respuestaBE.retornoBool = false;
-                respuestaBE.message = "Error";
-                respuestaBE.messageDetail = "The system receives 3 or more requests within two minutes";
-
-                return false;
-            }
-            return true;
-
-        }
-
-        private bool ValidPreviousRequest(bool lastRequestAccepted, TimeSpan nowRequestDate, TimeSpan lastRequestDate, RespuestaBE respuestaBE)
-        {
-            //Don't allow a new application requests within 30 seconds next to the previous one, if so,
-            //return HTTP code 429.
-            if (lastRequestAccepted == false)
-            {
-                var timeRequest = nowRequestDate - lastRequestDate;
-                var timeLimit = Convert.ToDateTime("01/01/2020 00:00:30").TimeOfDay;
-                if (timeRequest <= timeLimit)
-                {
-                    respuestaBE.code = "-102";
-                    respuestaBE.status = StatusCodes.Status429TooManyRequests;
-                    respuestaBE.retornoBool = false;
-                    respuestaBE.message = "Error";
-                    respuestaBE.messageDetail = "Don't allow a new application requests within 30 seconds next to the previous one";
-
-                    return false;
-                }
-            }
-            return true;
-
-        }
-
-        private double GetRecommendedapiCalendar(CreditLineBE apiCalendarBE)
-        {
-            //calcula recommendedapiCalendar
-            var recommendedapiCalendar = 0.0;
-            if (apiCalendarBE.foundingType == "SME")
-            {
-                recommendedapiCalendar = apiCalendarBE.monthlyRevenue / 5; //One fifth of the monthly revenue(5:1 ratio)
-            }
-            else if (apiCalendarBE.foundingType == "Startup")
-            {
-                var mR = apiCalendarBE.monthlyRevenue / 5;
-                var cB = apiCalendarBE.cashBalance / 3; //One third of the cash balance(3:1 ratio)
-                var maxValue = Math.Max(mR, cB);
-                recommendedapiCalendar = maxValue;
-            }
-            return recommendedapiCalendar;
-        }
-
-        private void GuardarTrama(CreditLineBE apiCalendarBE)
-        {
-
-            string contentRootPath = _webHostEnvironment.ContentRootPath;
-            string hoy = DateTime.Today.ToString("yyyyMMdd");
-            string fileUnicoName = string.Concat(hoy, ".txt");
-            string fileUnicoPath = Path.Combine(contentRootPath, "Tramas", fileUnicoName);
-
-            string trama = JsonConvert.SerializeObject(apiCalendarBE);
-
-            File.AppendAllLines(fileUnicoPath, new string[] { trama });
-
-        }
-
-        private CreditLineBE LeerTramas()
-        {
-            CreditLineBE apiCalendarBE = new CreditLineBE();
-            string contentRootPath = _webHostEnvironment.ContentRootPath;
-            string hoy = DateTime.Today.ToString("yyyyMMdd");
-            string fileUnicoName = string.Concat(hoy, ".txt");
-            string fileUnicoPath = Path.Combine(contentRootPath, "Tramas", fileUnicoName);
-
-
-            bool result = File.Exists(fileUnicoPath);
-            if (result == false)
-            {
-                File.CreateText(fileUnicoPath).Close(); ;
-            }
-            else
-            {
-                var line = File.ReadLines(fileUnicoPath);
-
-                if (line.Count() > 0)
-                {
-                    var lastLine = line.Last();
-                    if (!string.IsNullOrEmpty(lastLine))
-                        apiCalendarBE = JsonConvert.DeserializeObject<CreditLineBE>(lastLine);
-                }
-            }
-
-            return apiCalendarBE;
-        }
 
         public void CapturarError(Exception error, string controlador = "", string accion = "")
         {
@@ -510,6 +295,7 @@ namespace apiCalendar.Repository.Implementaciones
             _logger.LogError(errorFormat);
 
         }
+
         #endregion
 
 

@@ -147,25 +147,6 @@ namespace apiCalendar.Services.Implementaciones
 
         }
 
-        public RespuestaBE ProcesarLineaCredito(CreditLineBE creditLineBE)
-        {
-            RespuestaBE rptaBE = new RespuestaBE();
-
-            try
-            {
-                rptaBE = _apiCalendarRepository.ProcesarLineaCredito(creditLineBE);
-            }
-            catch (Exception ex)
-            {
-                rptaBE.code = "-1";
-                rptaBE.message = "Error: " + ex.Message.ToString();
-
-                CapturarError(ex, "apiCalendarService", "ProcesarLineaCredito");
-            }
-
-            return rptaBE;
-        }
-
         public void CapturarError(Exception error, string controlador = "", string accion = "")
         {
             var msg = error.Message;
