@@ -30,19 +30,22 @@ namespace apiCalendar.Repository.Implementaciones
         
         int maxNumbersRequest = 3;
         int maxTotalMinutesRequest = 2;
+        string connectionString = String.Empty;
 
         public CalendarRepository(IConfiguration configuration, ILogger<CalendarRepository> logger, IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
             _logger = logger;
+
+            connectionString = _configuration.GetConnectionString("Produccion");
         }
 
         #region "Metodos y Funciones"
 
         public IEnumerable<EventTypeBE> GetEventTypes() 
         {
-            var connectionString = _configuration.GetConnectionString("Produccion");
+            
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
