@@ -38,7 +38,7 @@ namespace apiCalendar.Repository.Implementaciones
             _configuration = configuration;
             _logger = logger;
 
-            connectionString = _configuration.GetConnectionString("Desarrollo"); //test Final
+            connectionString = _configuration.GetConnectionString("Desarrollo"); 
         }
 
         #region "Metodos y Funciones"
@@ -72,7 +72,7 @@ namespace apiCalendar.Repository.Implementaciones
 
         public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
         {
-            var connectionString = _configuration.GetConnectionString("Produccion");
+            
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
@@ -226,7 +226,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id)
         {
             List<CalendarBE> list = new List<CalendarBE>();
-            var connectionString = _configuration.GetConnectionString("Produccion");
+            
 
             var idquery = "a.id";
             if (id != 0)
