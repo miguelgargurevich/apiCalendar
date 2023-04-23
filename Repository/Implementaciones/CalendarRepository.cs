@@ -38,7 +38,7 @@ namespace apiCalendar.Repository.Implementaciones
             _configuration = configuration;
             _logger = logger;
 
-            connectionString = _configuration.GetConnectionString("Produccion"); //test
+            connectionString = _configuration.GetConnectionString("Desarrollo"); //test Final
         }
 
         #region "Metodos y Funciones"
