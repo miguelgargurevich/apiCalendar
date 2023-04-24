@@ -27,9 +27,7 @@ namespace apiCalendar.Repository.Implementaciones
         private readonly IConfiguration _configuration;
         private readonly ILogger<CalendarRepository> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        
-        int maxNumbersRequest = 3;
-        int maxTotalMinutesRequest = 2;
+
         string connectionString = String.Empty;
 
         public CalendarRepository(IConfiguration configuration, ILogger<CalendarRepository> logger, IWebHostEnvironment webHostEnvironment)
@@ -38,14 +36,14 @@ namespace apiCalendar.Repository.Implementaciones
             _configuration = configuration;
             _logger = logger;
 
-            connectionString = _configuration.GetConnectionString("Desarrollo"); 
+            connectionString = _configuration.GetConnectionString("dbDesa");
         }
 
         #region "Metodos y Funciones"
 
-        public IEnumerable<EventTypeBE> GetEventTypes() 
+        public IEnumerable<EventTypeBE> GetEventTypes()
         {
-            
+
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
@@ -63,7 +61,7 @@ namespace apiCalendar.Repository.Implementaciones
                         obj.Color = reader.GetString(2);
                         list.Add(obj);
                     }
-                    
+
                 }
             }
 
@@ -72,7 +70,7 @@ namespace apiCalendar.Repository.Implementaciones
 
         public async Task<IEnumerable<EventTypeBE>> GetEventTypesAsync()
         {
-            
+
             List<EventTypeBE> list = new List<EventTypeBE>();
             var queryString = "select * from [dbo].[EventType]";
 
@@ -104,7 +102,7 @@ namespace apiCalendar.Repository.Implementaciones
             string _query = "INSERT INTO [Calendar] (Title,StartDate,EndDate,AllDay,EventTypeId,EventTypeName,CalendarTypeId,CalendarTypeName,Description,UserCreate,DateCreate) " +
                 "values (@title,@startdate,@enddate,@allDay,@eventTypeId,@eventTypeName,@calendarTypeId,@calendarTypeName,@description,@userCreate,@dateCreate)" +
                 " Set @id = Scope_Identity();";
-            
+
             using (SqlConnection conn = new SqlConnection(_connStr))
             {
                 using (SqlCommand comm = new SqlCommand())
@@ -128,7 +126,7 @@ namespace apiCalendar.Repository.Implementaciones
                     try
                     {
                         conn.Open();
-                        comm.ExecuteNonQuery();
+                        await comm.ExecuteNonQueryAsync();
 
                         int returnID = (int)comm.Parameters["@id"].Value;
                         list.id = returnID;
@@ -173,7 +171,7 @@ namespace apiCalendar.Repository.Implementaciones
                     try
                     {
                         conn.Open();
-                        comm.ExecuteNonQuery();
+                        await comm.ExecuteNonQueryAsync();
                     }
                     catch (SqlException ex)
                     {
@@ -203,11 +201,11 @@ namespace apiCalendar.Repository.Implementaciones
                     comm.CommandType = CommandType.Text;
                     comm.CommandText = _query;
                     comm.Parameters.AddWithValue("@id", calendarBE.id);
-                   
+
                     try
                     {
                         conn.Open();
-                        comm.ExecuteNonQuery();
+                        await comm.ExecuteNonQueryAsync();
                     }
                     catch (SqlException ex)
                     {
@@ -226,7 +224,7 @@ namespace apiCalendar.Repository.Implementaciones
         public async Task<IEnumerable<CalendarBE>> GetCalendarAsync(int id)
         {
             List<CalendarBE> list = new List<CalendarBE>();
-            
+
 
             var idquery = "a.id";
             if (id != 0)
@@ -236,13 +234,14 @@ namespace apiCalendar.Repository.Implementaciones
                 "a.calendartypename, a.userCreate, a.dateCreate, a.allday, b.color " +
                 "FROM  dbo.Calendar a inner join dbo.EventType b on b.name = a.eventtypename where a.id = " + idquery;
 
-            try {
+            try
+            {
                 using (var conn = new SqlConnection(connectionString))
                 {
                     using (var adapter = new SqlDataAdapter(queryString, conn))
                     {
                         conn.Open();
-                        var reader = adapter.SelectCommand.ExecuteReader();
+                        var reader = await adapter.SelectCommand.ExecuteReaderAsync();
                         while (reader.Read())
                         {
                             CalendarBE obj = new CalendarBE();
@@ -265,11 +264,11 @@ namespace apiCalendar.Repository.Implementaciones
                     }
                 }
             }
-            catch (SqlException ex) 
-            { 
+            catch (SqlException ex)
+            {
                 CapturarError(ex, "Repository", "GetCalendarAsync");
             }
-           
+
 
             return list;
 
